@@ -70,7 +70,7 @@
          "web" : "https://github.com/doy/web-request"
       }
    },
-   "version" : "0.01",
+   "version" : "0.02",
    "x_Dist_Zilla" : {
       "plugins" : [
          {

@@ -3,7 +3,7 @@ BEGIN {
   $Web::Request::AUTHORITY = 'cpan:DOY';
 }
 {
-  $Web::Request::VERSION = '0.01';
+  $Web::Request::VERSION = '0.02';
 }
 use Moose;
 # ABSTRACT: common request class for web frameworks
@@ -51,10 +51,7 @@ has _base_uri => (
         my $env = $self->env;
 
         my $scheme = $self->scheme || "http";
-        my $server = $env->{HTTP_HOST};
-        $server = ($env->{SERVER_NAME} || '') . ':'
-                . ($env->{SERVER_PORT} || 80)
-            unless defined $server;
+        my $server = $self->host;
         my $path = $self->script_name || '/';
 
         return "${scheme}://${server}${path}";
@@ -401,6 +398,18 @@ sub _new_upload {
     $self->upload_class->new(@_);
 }
 
+sub host {
+    my $self = shift;
+
+    my $env = $self->env;
+    my $host = $env->{HTTP_HOST};
+    $host = ($env->{SERVER_NAME} || '') . ':'
+          . ($env->{SERVER_PORT} || 80)
+        unless defined $host;
+
+    return $host;
+}
+
 sub path {
     my $self = shift;
 
@@ -492,7 +501,7 @@ Web::Request - common request class for web frameworks
 
 =head1 VERSION
 
-version 0.01
+version 0.02
 
 =head1 SYNOPSIS
 
@@ -523,6 +532,12 @@ modified. Changing the encoding will change the return value of any subsequent
 calls to C<content>, C<query_parameters>, C<all_query_parameters>,
 C<body_parameters>, and C<all_body_parameters>.
 
+Web::Request is based heavily on L<Plack::Request>, but with the intention of
+growing to become more generally useful to end users (rather than just
+framework and middleware developers). In the future, it is expected to grow in
+functionality to support a lot more convenient functionality, while
+Plack::Request has a more minimalist goal.
+
 =head1 METHODS
 
 =head2 address
@@ -544,6 +559,12 @@ Returns the HTTP method (GET, POST, etc.) used in the current request.
 =head2 port
 
 Returns the local port that this request was made on.
+
+=head2 host
+
+Returns the contents of the HTTP C<Host> header. If it doesn't exist, falls
+back to recreating the host from the C<SERVER_NAME> and C<SERVER_PORT>
+variables.
 
 =head2 path
 
@@ -757,7 +778,8 @@ L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Web-Request>.
 
 =head1 SEE ALSO
 
-L<Plack::Request>
+L<Plack::Request> - Much of this module's API and implementation were taken
+from Plack::Request.
 
 =head1 SUPPORT
 
