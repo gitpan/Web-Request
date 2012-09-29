@@ -3,7 +3,7 @@ BEGIN {
   $Web::Response::AUTHORITY = 'cpan:DOY';
 }
 {
-  $Web::Response::VERSION = '0.04';
+  $Web::Response::VERSION = '0.05';
 }
 use Moose;
 # ABSTRACT: common response class for web frameworks
@@ -45,11 +45,21 @@ has content => (
     default => sub { [] },
 );
 
+has streaming_response => (
+    is        => 'rw',
+    isa       => 'CodeRef',
+    predicate => 'has_streaming_response',
+);
+
 has cookies => (
+    traits  => ['Hash'],
     is      => 'rw',
     isa     => 'HashRef[Str|HashRef[Str]]',
     lazy    => 1,
     default => sub { +{} },
+    handles => {
+        has_cookies => 'count',
+    },
 );
 
 has _encoding_obj => (
@@ -75,6 +85,11 @@ sub BUILDARGS {
                 : ()),
         };
     }
+    elsif (@_ == 1 && ref($_[0]) eq 'CODE') {
+        return {
+            streaming_response => $_[0],
+        };
+    }
     else {
         return $class->SUPER::BUILDARGS(@_);
     }
@@ -91,7 +106,8 @@ sub redirect {
 sub finalize {
     my $self = shift;
 
-    $self->_finalize_cookies;
+    return $self->_finalize_streaming
+        if $self->has_streaming_response;
 
     my $res = [
         $self->status,
@@ -111,9 +127,31 @@ sub finalize {
         $self->content
     ];
 
+    $self->_finalize_cookies($res);
+
     return $res unless $self->has_encoding;
 
     return Plack::Util::response_cb($res, sub {
+        return sub {
+            my $chunk = shift;
+            return unless defined $chunk;
+            return $self->_encode($chunk);
+        };
+    });
+}
+
+sub _finalize_streaming {
+    my $self = shift;
+
+    my $streaming = $self->streaming_response;
+
+    return $streaming
+        unless $self->has_encoding || $self->has_cookies;
+
+    return Plack::Util::response_cb($streaming, sub {
+        my $res = shift;
+        $self->_finalize_cookies($res);
+        return unless $self->has_encoding;
         return sub {
             my $chunk = shift;
             return unless defined $chunk;
@@ -131,10 +169,11 @@ sub _encode {
 
 sub _finalize_cookies {
     my $self = shift;
+    my ($res) = @_;
 
     my $cookies = $self->cookies;
     for my $name (keys %$cookies) {
-        $self->headers->push_header(
+        push @{ $res->[1] }, (
             'Set-Cookie' => $self->_bake_cookie($name, $cookies->{$name}),
         );
     }
@@ -205,7 +244,7 @@ Web::Response - common response class for web frameworks
 
 =head1 VERSION
 
-version 0.04
+version 0.05
 
 =head1 SYNOPSIS
 

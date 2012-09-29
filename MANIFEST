@@ -36,6 +36,9 @@ t/response-compatible.t
 t/response-cookie.t
 t/response-new.t
 t/response-redirect.t
+t/response-streaming-cookie.t
+t/response-streaming-utf8.t
+t/response-streaming.t
 t/response.t
 t/upload-basename.t
 t/upload-large.t

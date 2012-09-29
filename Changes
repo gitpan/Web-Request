@@ -1,5 +1,8 @@
 Revision history for Web-Request
 
+0.05  2012-09-29
+      - support streaming responses in Web::Response
+
 0.04  2012-09-28
       - fix reading content multiple times on perls below 5.12
 
