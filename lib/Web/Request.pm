@@ -3,7 +3,7 @@ BEGIN {
   $Web::Request::AUTHORITY = 'cpan:DOY';
 }
 {
-  $Web::Request::VERSION = '0.05';
+  $Web::Request::VERSION = '0.06';
 }
 use Moose;
 # ABSTRACT: common request class for web frameworks
@@ -500,7 +500,7 @@ Web::Request - common request class for web frameworks
 
 =head1 VERSION
 
-version 0.05
+version 0.06
 
 =head1 SYNOPSIS
 
