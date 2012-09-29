@@ -1,5 +1,8 @@
 Revision history for Web-Request
 
+0.04  2012-09-28
+      - fix reading content multiple times on perls below 5.12
+
 0.03  2012-09-28
       - add some diagnostics to a test to see if i can get some better feedback
         from cpantesters failures

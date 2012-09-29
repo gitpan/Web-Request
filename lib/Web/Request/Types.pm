@@ -3,7 +3,7 @@ BEGIN {
   $Web::Request::Types::AUTHORITY = 'cpan:DOY';
 }
 {
-  $Web::Request::Types::VERSION = '0.03';
+  $Web::Request::Types::VERSION = '0.04';
 }
 use strict;
 use warnings;
@@ -52,7 +52,7 @@ Web::Request::Types
 
 =head1 VERSION
 
-version 0.03
+version 0.04
 
 =head1 AUTHOR
 

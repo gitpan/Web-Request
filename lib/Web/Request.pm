@@ -3,7 +3,7 @@ BEGIN {
   $Web::Request::AUTHORITY = 'cpan:DOY';
 }
 {
-  $Web::Request::VERSION = '0.03';
+  $Web::Request::VERSION = '0.04';
 }
 use Moose;
 # ABSTRACT: common request class for web frameworks
@@ -148,7 +148,6 @@ has _http_body => (
 
 has _parsed_body => (
     traits  => ['Hash'],
-    is      => 'ro',
     isa     => 'HashRef',
     lazy    => 1,
     default => sub {
@@ -172,13 +171,13 @@ has _parsed_body => (
         my $input = $self->_input;
 
         if ($self->env->{'psgix.input.buffered'}) {
-            $input->seek(0, 0);
+            seek $input, 0, 0;
         }
 
         my $content = '';
         my $spin = 0;
         while ($cl) {
-            $input->read(my $chunk, $cl < 8192 ? $cl : 8192);
+            read $input, my $chunk, $cl < 8192 ? $cl : 8192;
             my $read = length($chunk);
             $cl -= $read;
             $body->add($chunk);
@@ -190,11 +189,11 @@ has _parsed_body => (
         }
 
         if ($self->env->{'psgix.input.buffered'}) {
-            $input->seek(0, 0);
+            seek $input, 0, 0;
         }
         else {
             open my $fh, '<', \$content;
-            $self->env->{'psgix.input'} = $fh;
+            $self->env->{'psgi.input'} = $fh;
             $self->env->{'psgix.input.buffered'} = 1;
         }
 
@@ -221,7 +220,7 @@ has content => (
 
         # XXX get Plack::TempBuffer onto CPAN separately, so that this doesn't
         # always have to be sitting in memory
-        return $self->_decode($self->_parsed_body->{content});
+        return $self->_decode($self->_content);
     },
 );
 
@@ -501,7 +500,7 @@ Web::Request - common request class for web frameworks
 
 =head1 VERSION
 
-version 0.03
+version 0.04
 
 =head1 SYNOPSIS
 
