@@ -3,7 +3,7 @@ BEGIN {
   $Web::Response::AUTHORITY = 'cpan:DOY';
 }
 {
-  $Web::Response::VERSION = '0.06';
+  $Web::Response::VERSION = '0.07';
 }
 use Moose;
 # ABSTRACT: common response class for web frameworks
@@ -244,7 +244,7 @@ Web::Response - common response class for web frameworks
 
 =head1 VERSION
 
-version 0.06
+version 0.07
 
 =head1 SYNOPSIS
 

@@ -3,7 +3,7 @@ BEGIN {
   $Web::Request::AUTHORITY = 'cpan:DOY';
 }
 {
-  $Web::Request::VERSION = '0.06';
+  $Web::Request::VERSION = '0.07';
 }
 use Moose;
 # ABSTRACT: common request class for web frameworks
@@ -13,6 +13,7 @@ use Encode ();
 use HTTP::Body ();
 use HTTP::Headers ();
 use HTTP::Message::PSGI ();
+use Stream::Buffered ();
 use URI ();
 use URI::Escape ();
 
@@ -148,6 +149,7 @@ has _http_body => (
 
 has _parsed_body => (
     traits  => ['Hash'],
+    is      => 'ro',
     isa     => 'HashRef',
     lazy    => 1,
     default => sub {
@@ -170,57 +172,43 @@ has _parsed_body => (
 
         my $input = $self->_input;
 
+        my $buffer;
         if ($self->env->{'psgix.input.buffered'}) {
-            seek $input, 0, 0;
+            $input->seek(0, 0);
+        }
+        else {
+            my $buffer = Stream::Buffered->new($cl);
         }
 
-        my $content = '';
         my $spin = 0;
         while ($cl) {
-            read $input, my $chunk, $cl < 8192 ? $cl : 8192;
+            $input->read(my $chunk, $cl < 8192 ? $cl : 8192);
             my $read = length($chunk);
             $cl -= $read;
             $body->add($chunk);
-            $content .= $chunk;
+            $buffer->print($chunk) if $buffer;
 
             if ($read == 0 && $spin++ > 2000) {
                 confess "Bad Content-Length ($cl bytes remaining)";
             }
         }
 
-        if ($self->env->{'psgix.input.buffered'}) {
-            seek $input, 0, 0;
+        if ($buffer) {
+            $self->env->{'psgix.input.buffered'} = 1;
+            $self->env->{'psgi.input'} = $buffer->rewind;
         }
         else {
-            open my $fh, '<', \$content;
-            $self->env->{'psgi.input'} = $fh;
-            $self->env->{'psgix.input.buffered'} = 1;
+            $input->seek(0, 0);
         }
 
         return {
-            content => $content,
             body    => $body->param,
             uploads => $body->upload,
         }
     },
     handles => {
-        _content => [ get => 'content' ],
         _body    => [ get => 'body' ],
         _uploads => [ get => 'uploads' ],
-    },
-);
-
-has content => (
-    is      => 'ro',
-    isa     => 'Str',
-    lazy    => 1,
-    clearer => '_clear_content',
-    default => sub {
-        my $self = shift;
-
-        # XXX get Plack::TempBuffer onto CPAN separately, so that this doesn't
-        # always have to be sitting in memory
-        return $self->_decode($self->_content);
     },
 );
 
@@ -446,6 +434,23 @@ sub param {
     $self->parameters->{$key};
 }
 
+sub content {
+    my $self = shift;
+
+    unless ($self->env->{'psgix.input.buffered'}) {
+        # the builder for this attribute also sets up psgi.input
+        $self->_parsed_body;
+    }
+
+    my $fh = $self->_input         or return '';
+    my $cl = $self->content_length or return '';
+
+    $fh->read(my $content, $cl, 0);
+    $fh->seek(0, 0);
+
+    return $self->_decode($content);
+}
+
 sub _decode {
     my $self = shift;
     my ($content) = @_;
@@ -473,7 +478,6 @@ sub encoding {
 sub _clear_encoded_data {
     my $self = shift;
     $self->_clear_encoding_obj;
-    $self->_clear_content;
     $self->_clear_query_parameters;
     $self->_clear_all_query_parameters;
     $self->_clear_body_parameters;
@@ -500,7 +504,7 @@ Web::Request - common request class for web frameworks
 
 =head1 VERSION
 
-version 0.06
+version 0.07
 
 =head1 SYNOPSIS
 

@@ -41,12 +41,13 @@ my %WriteMakefileArgs = (
     "Moose" => 0,
     "Moose::Util::TypeConstraints" => 0,
     "Plack::Util" => 0,
+    "Stream::Buffered" => 0,
     "URI" => 0,
     "URI::Escape" => 0,
     "strict" => 0,
     "warnings" => 0
   },
-  "VERSION" => "0.06",
+  "VERSION" => "0.07",
   "test" => {
     "TESTS" => "t/*.t"
   }
