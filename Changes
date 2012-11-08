@@ -1,5 +1,8 @@
 Revision history for Web-Request
 
+0.08  2012-11-07
+      - fix tests with new HTTP::Message
+
 0.07  2012-09-30
       - switch to using Stream::Buffered
 

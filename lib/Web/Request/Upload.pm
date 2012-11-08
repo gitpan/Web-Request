@@ -3,7 +3,7 @@ BEGIN {
   $Web::Request::Upload::AUTHORITY = 'cpan:DOY';
 }
 {
-  $Web::Request::Upload::VERSION = '0.07';
+  $Web::Request::Upload::VERSION = '0.08';
 }
 use Moose;
 # ABSTRACT: class representing a file upload
@@ -70,7 +70,7 @@ Web::Request::Upload - class representing a file upload
 
 =head1 VERSION
 
-version 0.07
+version 0.08
 
 =head1 SYNOPSIS
 
