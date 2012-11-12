@@ -3,7 +3,7 @@ BEGIN {
   $Web::Response::AUTHORITY = 'cpan:DOY';
 }
 {
-  $Web::Response::VERSION = '0.08';
+  $Web::Response::VERSION = '0.09';
 }
 use Moose;
 # ABSTRACT: common response class for web frameworks
@@ -236,6 +236,7 @@ no Moose;
 1;
 
 __END__
+
 =pod
 
 =head1 NAME
@@ -244,7 +245,7 @@ Web::Response - common response class for web frameworks
 
 =head1 VERSION
 
-version 0.08
+version 0.09
 
 =head1 SYNOPSIS
 
@@ -391,4 +392,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-

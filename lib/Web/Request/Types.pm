@@ -3,7 +3,7 @@ BEGIN {
   $Web::Request::Types::AUTHORITY = 'cpan:DOY';
 }
 {
-  $Web::Request::Types::VERSION = '0.08';
+  $Web::Request::Types::VERSION = '0.09';
 }
 use strict;
 use warnings;
@@ -44,6 +44,7 @@ coerce 'Web::Request::Types::PSGIBody',
 1;
 
 __END__
+
 =pod
 
 =head1 NAME
@@ -52,7 +53,7 @@ Web::Request::Types
 
 =head1 VERSION
 
-version 0.08
+version 0.09
 
 =head1 AUTHOR
 
@@ -66,4 +67,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-

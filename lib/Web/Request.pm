@@ -3,7 +3,7 @@ BEGIN {
   $Web::Request::AUTHORITY = 'cpan:DOY';
 }
 {
-  $Web::Request::VERSION = '0.08';
+  $Web::Request::VERSION = '0.09';
 }
 use Moose;
 # ABSTRACT: common request class for web frameworks
@@ -158,8 +158,11 @@ has _parsed_body => (
         my $ct = $self->content_type;
         my $cl = $self->content_length;
         if (!$ct && !$cl) {
+            if (!$self->env->{'psgix.input.buffered'}) {
+                $self->env->{'psgix.input.buffered'} = 1;
+                $self->env->{'psgi.input'} = Stream::Buffered->new(0)->rewind;
+            }
             return {
-                content => '',
                 body    => {},
                 uploads => {},
             };
@@ -177,7 +180,7 @@ has _parsed_body => (
             $input->seek(0, 0);
         }
         else {
-            my $buffer = Stream::Buffered->new($cl);
+            $buffer = Stream::Buffered->new($cl);
         }
 
         my $spin = 0;
@@ -496,6 +499,7 @@ no Moose;
 1;
 
 __END__
+
 =pod
 
 =head1 NAME
@@ -504,7 +508,7 @@ Web::Request - common request class for web frameworks
 
 =head1 VERSION
 
-version 0.08
+version 0.09
 
 =head1 SYNOPSIS
 
@@ -826,4 +830,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-
