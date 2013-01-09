@@ -3,7 +3,7 @@ BEGIN {
   $Web::Request::AUTHORITY = 'cpan:DOY';
 }
 {
-  $Web::Request::VERSION = '0.09';
+  $Web::Request::VERSION = '0.10';
 }
 use Moose;
 # ABSTRACT: common request class for web frameworks
@@ -508,7 +508,7 @@ Web::Request - common request class for web frameworks
 
 =head1 VERSION
 
-version 0.09
+version 0.10
 
 =head1 SYNOPSIS
 
@@ -824,7 +824,7 @@ Jesse Luehrs <doy at cpan dot org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2012 by Jesse Luehrs.
+This software is copyright (c) 2013 by Jesse Luehrs.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.

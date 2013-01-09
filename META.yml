@@ -45,7 +45,7 @@ resources:
   bugtracker: http://rt.cpan.org/Public/Dist/Display.html?Name=Web-Request
   homepage: http://metacpan.org/release/Web-Request
   repository: git://github.com/doy/web-request.git
-version: 0.09
+version: 0.10
 x_Dist_Zilla:
   perl:
     version: 5.016002
