@@ -3,7 +3,7 @@ BEGIN {
   $Web::Response::AUTHORITY = 'cpan:DOY';
 }
 {
-  $Web::Response::VERSION = '0.10';
+  $Web::Response::VERSION = '0.11';
 }
 use Moose;
 # ABSTRACT: common response class for web frameworks
@@ -140,6 +140,11 @@ sub finalize {
     });
 }
 
+sub to_app {
+    my $self = shift;
+    return sub { $self->finalize };
+}
+
 sub _finalize_streaming {
     my $self = shift;
 
@@ -245,7 +250,7 @@ Web::Response - common response class for web frameworks
 
 =head1 VERSION
 
-version 0.10
+version 0.11
 
 =head1 SYNOPSIS
 
@@ -330,6 +335,11 @@ Returns a valid L<PSGI> response, based on the values given. This can be either
 an arrayref or a coderef, depending on if an immediate or streaming response
 was provided. If both were provided, the streaming response will be preferred.
 
+=head2 to_app
+
+Returns a PSGI application which just returns the response in this object
+directly.
+
 =head1 CONSTRUCTOR
 
 =head2 new(%params)
@@ -382,7 +392,7 @@ C<streaming_response> attribute.
 
 =head1 AUTHOR
 
-Jesse Luehrs <doy at cpan dot org>
+Jesse Luehrs <doy@tozt.net>
 
 =head1 COPYRIGHT AND LICENSE
 

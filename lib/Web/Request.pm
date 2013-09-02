@@ -3,16 +3,16 @@ BEGIN {
   $Web::Request::AUTHORITY = 'cpan:DOY';
 }
 {
-  $Web::Request::VERSION = '0.10';
+  $Web::Request::VERSION = '0.11';
 }
 use Moose;
 # ABSTRACT: common request class for web frameworks
 
-use Class::Load ();
 use Encode ();
 use HTTP::Body ();
 use HTTP::Headers ();
 use HTTP::Message::PSGI ();
+use Module::Runtime ();
 use Stream::Buffered ();
 use URI ();
 use URI::Escape ();
@@ -82,8 +82,7 @@ has uri => (
         # in, we recognize it as /foo/bar which is not ideal, but that's
         # how the PSGI PATH_INFO spec goes and we can't do anything
         # about it. See PSGI::FAQ for details.
-        # http://github.com/miyagawa/Plack/issues#issue/118
-        my $path_escape_class = '^A-Za-z0-9\-\._~/';
+        my $path_escape_class = q{^/;:@&=A-Za-z0-9\$_.+!*'(),-};
 
         my $path = URI::Escape::uri_escape(
             $self->path_info || '',
@@ -374,7 +373,7 @@ sub new_from_request {
 sub new_response {
     my $self = shift;
 
-    Class::Load::load_class($self->response_class);
+    Module::Runtime::use_package_optimistically($self->response_class);
     my $res = $self->response_class->new(@_);
     $res->_encoding_obj($self->_encoding_obj)
         if $self->has_encoding;
@@ -384,7 +383,7 @@ sub new_response {
 sub _new_upload {
     my $self = shift;
 
-    Class::Load::load_class($self->upload_class);
+    Module::Runtime::use_package_optimistically($self->upload_class);
     $self->upload_class->new(@_);
 }
 
@@ -424,7 +423,7 @@ sub all_parameters {
     my $body_parameters = $self->all_body_parameters;
 
     for my $key (keys %$body_parameters) {
-        push @{ $ret->{$key} ||= [] }, @{ $body_parameters->{key} };
+        push @{ $ret->{$key} ||= [] }, @{ $body_parameters->{$key} };
     }
 
     return $ret;
@@ -447,6 +446,8 @@ sub content {
 
     my $fh = $self->_input         or return '';
     my $cl = $self->content_length or return '';
+
+    $fh->seek(0, 0); # just in case middleware/apps read it without seeking back
 
     $fh->read(my $content, $cl, 0);
     $fh->seek(0, 0);
@@ -508,7 +509,7 @@ Web::Request - common request class for web frameworks
 
 =head1 VERSION
 
-version 0.10
+version 0.11
 
 =head1 SYNOPSIS
 
@@ -798,21 +799,21 @@ You can also look for information at:
 
 =over 4
 
-=item * AnnoCPAN: Annotated CPAN documentation
+=item * MetaCPAN
 
-L<http://annocpan.org/dist/Web-Request>
+L<https://metacpan.org/release/Web-Request>
 
-=item * CPAN Ratings
+=item * Github
 
-L<http://cpanratings.perl.org/d/Web-Request>
+L<https://github.com/doy/web-request>
 
 =item * RT: CPAN's request tracker
 
 L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Web-Request>
 
-=item * Search CPAN
+=item * CPAN Ratings
 
-L<http://search.cpan.org/dist/Web-Request>
+L<http://cpanratings.perl.org/d/Web-Request>
 
 =back
 
@@ -820,7 +821,7 @@ L<http://search.cpan.org/dist/Web-Request>
 
 =head1 AUTHOR
 
-Jesse Luehrs <doy at cpan dot org>
+Jesse Luehrs <doy@tozt.net>
 
 =head1 COPYRIGHT AND LICENSE
 

@@ -39,6 +39,7 @@ t/response-redirect.t
 t/response-streaming-cookie.t
 t/response-streaming-utf8.t
 t/response-streaming.t
+t/response-to_app.t
 t/response.t
 t/upload-basename.t
 t/upload-large.t
